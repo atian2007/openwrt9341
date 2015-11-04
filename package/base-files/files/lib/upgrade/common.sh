@@ -227,6 +227,12 @@ default_do_upgrade() {
 
 do_upgrade() {
 	v "Performing system upgrade..."
+	
+	#add by zhx 
+	#before erase flash set the flag
+	v "flag=1" > flag_flash
+	mtd write flag_flash /dev/mtd7
+   #end	
 	if type 'platform_do_upgrade' >/dev/null 2>/dev/null; then
 		platform_do_upgrade "$ARGV"
 	else
@@ -236,7 +242,12 @@ do_upgrade() {
 	if [ "$SAVE_CONFIG" -eq 1 ] && type 'platform_copy_config' >/dev/null 2>/dev/null; then
 		platform_copy_config
 	fi
-
+	
+	#add by zhx 
+	#after upgrade set change the flag
+	v "flag=0" > flag_flash
+	mtd write flag_flash /dev/mtd7
+	#end		
 	v "Upgrade completed"
 	[ -n "$DELAY" ] && sleep "$DELAY"
 	ask_bool 1 "Reboot" && {
